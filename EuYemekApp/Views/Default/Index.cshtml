@@ -1,0 +1,27 @@
+﻿@model EuYemekApp.Models.DefaultViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Bugün  EU Yemekhanede ne var? | ABIS TEKN App</title>
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="~/Bootstrap/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <h3>@Model.Tarih</h3>
+        <p>
+            @Html.Raw(Model.Menu)
+        </p>
+    </div>
+</body>
+</html>
