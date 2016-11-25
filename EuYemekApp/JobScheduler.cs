@@ -12,7 +12,7 @@ namespace EuYemekApp
         public static void Start()
         {
             IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler();
-            scheduler.Start();
+           
 
             IJobDetail job = JobBuilder.Create<WebPushJob>().Build();
 
@@ -21,12 +21,13 @@ namespace EuYemekApp
                   (s =>
                      s.WithIntervalInHours(24)
                     .OnEveryDay()
-                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(08, 30))
+                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(8, 25))
                     //.InTimeZone( TimeZoneInfo.FindSystemTimeZoneById() ) // istanbul ne acaba
                   )
                 .Build();
 
             scheduler.ScheduleJob(job, trigger);
+            scheduler.Start();
         }
 
     }

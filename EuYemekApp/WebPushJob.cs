@@ -7,6 +7,7 @@ using System.Web;
 using System.Collections.Specialized;
 using EuYemekApp.Controllers;
 using System.Web.Configuration;
+using System.Text;
 
 namespace EuYemekApp
 {
@@ -16,9 +17,15 @@ namespace EuYemekApp
         const string DataUrl = "http://www.erciyes.edu.tr/kategori/KAMPUSTE-YASAM/Yemek-Hizmetleri/22/167";
         public async void Execute(IJobExecutionContext context)
         {
-            string token = WebConfigurationManager.AppSettings["AuthToken"]; 
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Sunday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday)
+            {
+              return;
+            }
+
+            string token = WebConfigurationManager.AppSettings["AuthToken"];
             string projectID = WebConfigurationManager.AppSettings["ProjectID"];
-            string url = "https://pushpad.xyz/projects/" + projectID + "/notification";
+            //projects/PROJECT_ID/notifications
+            string url = "https://pushpad.xyz/projects/" + projectID + "/notifications";
             string link = "http://yemekhane.azurewebsites.net/";
             string icon = "http://yemekhane.azurewebsites.net/pushicon.png";
 
@@ -26,19 +33,26 @@ namespace EuYemekApp
             {
                 client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
                 client.Headers.Add(HttpRequestHeader.Accept, "application/json");
-                client.Headers.Add(HttpRequestHeader.Authorization, "Token token\"" + token + "\"");
+
+                client.Headers.Add(HttpRequestHeader.Authorization, "Token token=\"" + token + "\"");
+                var header = client.Headers;
+
 
                 var model = await DefaultController.GununMenusunuGetirAsync(DataUrl);
-                string PostParam = string.Format("\"notification\": { \"body\": \"{0}\", \"title\": \"{1}\", \"target_url\": \"{2}\", \"icon_url\": \"{3}\", \"ttl\": {4} }",
-                    model.Menu,
-                    model.Tarih,
-                    link,
-                    icon,
-                    600);
+                model.Menu = model.Menu
+                    .Replace("<br />", "")
+                    .Trim();
+                if (model.Menu.Length > 120)
+                {
+                    model.Menu = model.Menu.Substring(0, 118);
+                }
+                string PostParam = "{\"notification\": { \"body\": \"" + model.Menu + "\", \"title\": \"" + model.Tarih
+                    + "\", \"target_url\": \"" + link + "\", \"icon_url\": \"" + icon + "\", \"ttl\": " + 600 + " }}";
 
 
-                var response = await client.UploadStringTaskAsync(url, PostParam);
-            };
+                byte[] postData = Encoding.UTF8.GetBytes(PostParam);
+                var response = await client.UploadDataTaskAsync(url, postData);
+            }
 
         }
 
