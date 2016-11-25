@@ -9,5 +9,6 @@ namespace EuYemekApp.Models
     {
         public string Tarih { get; set; }
         public string Menu { get; set; }
+        public string ProjeID { get; set; }
     }
 }

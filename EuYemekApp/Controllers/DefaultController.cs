@@ -18,6 +18,7 @@ namespace EuYemekApp.Controllers
         public async Task<ActionResult> Index()
         {
             DefaultViewModel Model = await GununMenusunuGetirAsync(DataUrl);
+            Model.ProjeID = System.Configuration.ConfigurationManager.AppSettings["ProjectID"];
             return View(Model);
         }
 
