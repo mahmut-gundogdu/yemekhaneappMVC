@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -17,9 +18,39 @@ namespace EuYemekApp.Controllers
         [OutputCache(Duration = 40, VaryByParam = "none")]
         public async Task<ActionResult> Index()
         {
-            DefaultViewModel Model = await GununMenusunuGetirAsync(DataUrl);
-            Model.ProjeID = System.Configuration.ConfigurationManager.AppSettings["ProjectID"];
-            return View(Model);
+            if (Request.AcceptTypes.Contains("text/plain"))
+            {
+                return await Text();
+            }
+            else
+            {
+                DefaultViewModel Model = await GununMenusunuGetirAsync(DataUrl);
+                Model.ProjeID = System.Configuration.ConfigurationManager.AppSettings["ProjectID"];
+                return View(Model);
+            }
+        }
+        //  [OutputCache(Duration = 40, VaryByParam = "none")]
+        public async Task<ActionResult> Text()
+        {
+
+            if (DateTime.Now.DayOfWeek == DayOfWeek.Sunday || DateTime.Now.DayOfWeek == DayOfWeek.Saturday)
+            {
+                return new HttpStatusCodeResult(400, "Bu gün ABIS yemekhaneye gitmez!");
+            }
+            else if (DateTime.Now.DayOfWeek == DayOfWeek.Friday)
+            {
+                return Content("Hayırlı cumalar.", "text/plain");
+            }
+            else
+            {
+                DefaultViewModel Model = await GununMenusunuGetirAsync(DataUrl);
+                Model.ProjeID = System.Configuration.ConfigurationManager.AppSettings["ProjectID"];
+
+                Regex rx = new Regex(@"<br\s*\/?>");
+                //   var x=rx.IsMatch(Model.Menu);*
+                var result = rx.Replace(Model.Menu, string.Empty); //"\n\r");
+                return Content(result, "text/plain");
+            }
         }
 
         public static async Task<DefaultViewModel> GununMenusunuGetirAsync(string _url)
@@ -43,7 +74,7 @@ namespace EuYemekApp.Controllers
             htmlMenu = htmlMenu.Replace("</li>", "<br />");
             htmlMenu = htmlMenu.Replace("<li>", "");
             Model.Menu = htmlMenu;
-            return Model; 
+            return Model;
         }
     }
 }
